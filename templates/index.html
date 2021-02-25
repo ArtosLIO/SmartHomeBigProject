@@ -1,0 +1,127 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+	<title> GPIO Control Web App</title> 
+	<link rel="styleSheet" href="/static/sty.css"/>
+	<script src="{{ url_for('static', filename='jquery-3.4.1.min.js') }}"></script>
+	<script src="D:\Универ\Raspery\Finish\static\jquery-3.4.1.min.js"></script>
+	<script src="D:\Универ\Raspery\Finish\static\highcharts\code\highcharts.js" type="text/javascript"></script>
+	<script src="D:\Универ\Raspery\Finish\static\highcharts\code\modules\exporting.js"></script> 
+	<script src="D:\Универ\Raspery\Finish\static\highcharts\code\modules\export-data.js"></script>
+	<script src="D:\Универ\Raspery\Finish\static\highcharts\code\modules\accessibility.js"></script>
+
+	<script type="text/javascript">
+		var dataGraph = [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4];;
+		var dateGraph = ['2020-03-23 12:10:55', '2020-03-23 13:10:55', '2020-03-23 14:10:55', '2020-03-23 15:10:55', '2020-03-23 16:10:55', '2020-03-23 17:10:55', '2020-03-23 18:10:55', '2020-03-23 19:10:55', '2020-03-23 20:10:55', '2020-03-23 21:10:55', '2020-03-23 22:10:55', '2020-03-23 23:10:55'];
+		var dat_min = [129, 129, 129, 129, 129, 129, 129, 129, 129, 129, 129, 129];
+		var dat_max = [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40];
+	</script>
+	
+	<script type="text/javascript">
+function refreshData() {
+	$.ajax({
+		url: "/refresh", 
+		type: "GET",
+		dataType: "json",
+		success: function(data) {
+			$("#temperature").html(data.result);
+			$("#time").html(data.second_r);
+			/*dataGraph = data.data_graph;
+			dateGraph = data.date_graph;
+			dat_max = data.dat_max;
+			dat_min = data.dat_min;*/
+			setTimeout(refreshData, 1000);
+		},
+		error: function(xhr, status, err) {
+			alert("Error: " + err);
+		}
+	});
+}
+document.addEventListener("DOMContentLoaded", function(){
+    refreshData();
+});
+	</script>
+
+	<script type="text/javascript">
+		var chart1;
+		$(document).ready(function(){
+		  chart1 = new Highcharts.Chart({
+		    chart: {renderTo: 'container1'},
+		    title: {
+		        text: 'Graphic temperature'
+		    },
+		    xAxis: {
+		        title: {
+		        	text: 'DateTime'
+		        },
+		        categories: dateGraph
+		    },
+		    yAxis: {
+		        title: {
+		            text: 'Temperature'
+		        }
+		    },
+		    plotOptions: {
+		        series: {
+		            marker: {
+		                symbol: 'circle',
+		                radius: 2
+		            }
+		        }
+		    },
+		    tooltip: {
+		        shared: true,
+		        valueSuffix: '°C'
+		    },
+		    series: [
+		    {
+		    	name: 'T',
+		    	data: dataGraph, 
+		    	color: 'black', 
+		    	type: 'areaspline'
+			}, {
+				name: 'MaxT', 
+				data: dat_max, 
+				color: 'red',
+				dashStyle: 'ShortDash',
+				type: 'spline'
+			},{
+				name: 'MinT', 
+				data: dat_min, 
+				color: 'blue',
+				dashStyle: 'ShortDash',
+				type: 'spline'
+			}]
+		  });
+		});	
+	</script>
+</head> 
+<body> 
+	<h1>Actuators</h1><br>
+	<h2>Maximum value: {{maxvalue}}</h2>
+	<h2>Minimum value: {{minvalue}}</h2> 
+	<h2>Temperature: <span id="temperature">{{ temperature }}</span></h2>
+	<h2>Status <span id="time">{{time}}</span></h2> 
+	<h3> RED LED --> {{ledRed}}</h3> 
+	<h2>Led Control</h2> 
+	<h3> RED LED CNTRL ==> 
+		<a href ="/on" class="button">TURN ON</a> 
+		<a href="/off" class = "button">TURN OFF</a>
+	</h3>
+	<form action='/t' method="post">
+		<p>
+			Max value: <input type="text", maxlength=2, name=maxt><Br>
+		</p>
+		<p>
+			Minimal value: <input type="text", maxlength=2, name=mint><Br>
+		</p>
+		<p>
+			<a class="button"><input type="submit", value="Подтвердить"></a>
+		</p>
+	</form>
+
+	<figure>
+		<div id="container1" style="width: 100%; height: 400px;"></div>
+	</figure>
+</body> 
+</html>
